@@ -41,10 +41,10 @@ export function TransactionItem({ transaction, index }: TransactionItemProps) {
           className={`p-2.5 rounded-xl ${
             isIncome
               ? "bg-success/10 text-success"
-              : "bg-destructive/10 text-destructive"
+              : "bg-gradient-primary"
           }`}
         >
-          {isIncome ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
+          {isIncome ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} className="text-foreground" />}
         </div>
         <div>
           <p className="font-medium text-foreground">{transaction.description}</p>
