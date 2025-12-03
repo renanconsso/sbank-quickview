@@ -6,49 +6,49 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    --background: 280 40% 6%;
+    --foreground: 300 20% 98%;
 
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
+    --card: 280 40% 9%;
+    --card-foreground: 300 20% 98%;
 
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 280 40% 9%;
+    --popover-foreground: 300 20% 98%;
 
-    --primary: 174 72% 56%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 288 72% 50%;
+    --primary-foreground: 300 20% 98%;
 
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 280 30% 14%;
+    --secondary-foreground: 300 20% 98%;
 
-    --muted: 222 30% 14%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 280 30% 14%;
+    --muted-foreground: 280 20% 55%;
 
-    --accent: 174 72% 56%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 324 90% 50%;
+    --accent-foreground: 300 20% 98%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 300 20% 98%;
 
     --success: 142 76% 46%;
-    --success-foreground: 210 40% 98%;
+    --success-foreground: 300 20% 98%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 174 72% 56%;
+    --border: 280 30% 18%;
+    --input: 280 30% 18%;
+    --ring: 288 72% 50%;
 
     --radius: 0.75rem;
 
-    /* Custom tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(174, 72%, 56%), hsl(174, 72%, 40%));
-    --gradient-card: linear-gradient(180deg, hsl(222, 47%, 11%), hsl(222, 47%, 8%));
-    --shadow-glow: 0 0 40px hsl(174 72% 56% / 0.15);
-    --shadow-card: 0 4px 24px hsl(222 47% 4% / 0.4);
+    /* Custom gradient tokens - purple to pink */
+    --gradient-primary: linear-gradient(135deg, #9C27D5, #E918A1);
+    --gradient-card: linear-gradient(180deg, hsl(280, 40%, 11%), hsl(280, 40%, 8%));
+    --shadow-glow: 0 0 40px hsl(288 72% 50% / 0.2);
+    --shadow-card: 0 4px 24px hsl(280 40% 4% / 0.4);
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    --background: 280 40% 6%;
+    --foreground: 300 20% 98%;
   }
 }
 
@@ -69,11 +69,21 @@
     background-image: var(--gradient-primary);
   }
 
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
   .card-gradient {
     background: var(--gradient-card);
   }
 
   .glow {
     box-shadow: var(--shadow-glow);
+  }
+
+  .border-gradient {
+    border: 1px solid transparent;
+    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+                var(--gradient-primary) border-box;
   }
 }

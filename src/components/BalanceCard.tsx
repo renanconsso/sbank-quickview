@@ -16,7 +16,7 @@ export function BalanceCard({ balance }: BalanceCardProps) {
   };
 
   return (
-    <div className="card-gradient rounded-2xl p-6 border border-border glow animate-fade-in">
+    <div className="border-gradient rounded-2xl p-6 glow animate-fade-in card-gradient">
       <div className="flex items-center justify-between mb-2">
         <span className="text-muted-foreground text-sm font-medium">
           Saldo disponível
