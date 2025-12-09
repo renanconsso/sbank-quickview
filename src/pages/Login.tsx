@@ -8,24 +8,9 @@ import sbankLogo from "@/assets/sbank-logo.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [cpf, setCpf] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
-    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
-    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
-  };
-
-  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCPF(e.target.value);
-    if (formatted.length <= 14) {
-      setCpf(formatted);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,13 +27,13 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
           <div className="space-y-2">
-            <Label htmlFor="cpf" className="text-foreground">CPF</Label>
+            <Label htmlFor="username" className="text-foreground">Usuário</Label>
             <Input
-              id="cpf"
+              id="username"
               type="text"
-              placeholder="000.000.000-00"
-              value={cpf}
-              onChange={handleCPFChange}
+              placeholder="Digite seu usuário"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="bg-card border-border focus:border-primary"
               required
             />
