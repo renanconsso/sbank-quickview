@@ -86,4 +86,17 @@
     background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
                 var(--gradient-primary) border-box;
   }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
 }

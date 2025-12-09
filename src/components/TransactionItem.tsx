@@ -1,4 +1,5 @@
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface Transaction {
   id: string;
@@ -11,9 +12,10 @@ export interface Transaction {
 interface TransactionItemProps {
   transaction: Transaction;
   index: number;
+  onContest?: (transaction: Transaction) => void;
 }
 
-export function TransactionItem({ transaction, index }: TransactionItemProps) {
+export function TransactionItem({ transaction, index, onContest }: TransactionItemProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -53,13 +55,26 @@ export function TransactionItem({ transaction, index }: TransactionItemProps) {
           </p>
         </div>
       </div>
-      <span
-        className={`font-semibold ${
-          isIncome ? "text-success" : "text-foreground"
-        }`}
-      >
-        {isIncome ? "+" : "-"} {formatCurrency(transaction.amount)}
-      </span>
+      <div className="flex items-center gap-3">
+        {!isIncome && onContest && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onContest(transaction)}
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          >
+            <MessageCircle size={16} className="mr-1" />
+            Contestar
+          </Button>
+        )}
+        <span
+          className={`font-semibold ${
+            isIncome ? "text-success" : "text-foreground"
+          }`}
+        >
+          {isIncome ? "+" : "-"} {formatCurrency(transaction.amount)}
+        </span>
+      </div>
     </div>
   );
 }
