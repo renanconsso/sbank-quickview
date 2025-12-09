@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { BalanceCard } from "@/components/BalanceCard";
 import { TransactionList } from "@/components/TransactionList";
 import { Transaction } from "@/components/TransactionItem";
+import { ChatDrawer } from "@/components/ChatDrawer";
 
 const mockTransactions: Transaction[] = [
   {
@@ -44,6 +46,18 @@ const mockTransactions: Transaction[] = [
 const Index = () => {
   const userName = "Carlos Eduardo";
   const balance = 8750.42;
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  const handleContestTransaction = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setChatOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setChatOpen(false);
+    setSelectedTransaction(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,9 +66,18 @@ const Index = () => {
         
         <main className="space-y-6">
           <BalanceCard balance={balance} />
-          <TransactionList transactions={mockTransactions} />
+          <TransactionList 
+            transactions={mockTransactions} 
+            onContestTransaction={handleContestTransaction}
+          />
         </main>
       </div>
+
+      <ChatDrawer
+        isOpen={chatOpen}
+        onClose={handleCloseChat}
+        transactionDescription={selectedTransaction?.description || ""}
+      />
     </div>
   );
 };
