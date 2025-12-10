@@ -21,6 +21,8 @@ interface ChatDrawerProps {
 export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDrawerProps) {
   const { toast } = useToast();
   const [showFacialValidation, setShowFacialValidation] = useState(false);
+  const [facialValidationRequested, setFacialValidationRequested] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -41,13 +43,24 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    const newCount = messageCount + 1;
+    setMessageCount(newCount);
 
     // Simulated response
     setTimeout(() => {
+      let responseContent: string;
+      
+      if (newCount === 1) {
+        responseContent = "Entendi. Para prosseguir com a contestação deste valor, precisamos validar sua identidade por questões de segurança. Por favor, realize a validação facial clicando no botão abaixo.";
+        setFacialValidationRequested(true);
+      } else {
+        responseContent = "Obrigado pela informação. Por favor, realize a validação facial para continuarmos com o processo de contestação.";
+      }
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Obrigado por entrar em contato. Um de nossos atendentes irá analisar sua solicitação em breve. Você pode fornecer mais detalhes sobre o motivo da contestação?",
+        content: responseContent,
       };
       setMessages((prev) => [...prev, botResponse]);
     }, 1000);
@@ -123,14 +136,16 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
         </ScrollArea>
 
         <div className="p-4 border-t border-border space-y-3">
-          <Button
-            onClick={() => setShowFacialValidation(true)}
-            variant="outline"
-            className="w-full border-primary text-primary hover:bg-primary/10"
-          >
-            <ScanFace size={18} className="mr-2" />
-            Validação Facial
-          </Button>
+          {facialValidationRequested && (
+            <Button
+              onClick={() => setShowFacialValidation(true)}
+              variant="outline"
+              className="w-full border-primary text-primary hover:bg-primary/10"
+            >
+              <ScanFace size={18} className="mr-2" />
+              Validação Facial
+            </Button>
+          )}
           <div className="flex gap-2">
             <Input
               value={input}
