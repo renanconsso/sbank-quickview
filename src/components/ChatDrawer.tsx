@@ -1,10 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Send, ScanFace } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FacialValidationModal } from "./FacialValidationModal";
-import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -19,10 +18,8 @@ interface ChatDrawerProps {
 }
 
 export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDrawerProps) {
-  const { toast } = useToast();
-  const [showFacialValidation, setShowFacialValidation] = useState(false);
+  const navigate = useNavigate();
   const [facialValidationRequested, setFacialValidationRequested] = useState(false);
-  const [messageCount, setMessageCount] = useState(0);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -43,26 +40,23 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    const newCount = messageCount + 1;
-    setMessageCount(newCount);
 
-    // Simulated response
+    // Simulated backend response
     setTimeout(() => {
-      let responseContent: string;
+      // Backend returns message requiring photo validation
+      const responseContent = "Para prosseguir com a contestação deste valor, é necessário validação por foto. Por favor, clique no botão abaixo para realizar a validação facial.";
       
-      if (newCount === 1) {
-        responseContent = "Entendi. Para prosseguir com a contestação deste valor, precisamos validar sua identidade por questões de segurança. Por favor, realize a validação facial clicando no botão abaixo.";
-        setFacialValidationRequested(true);
-      } else {
-        responseContent = "Obrigado pela informação. Por favor, realize a validação facial para continuarmos com o processo de contestação.";
-      }
-
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: responseContent,
       };
       setMessages((prev) => [...prev, botResponse]);
+
+      // Check if message contains the trigger phrase
+      if (responseContent.toLowerCase().includes("necessário validação por foto")) {
+        setFacialValidationRequested(true);
+      }
     }, 1000);
   };
 
@@ -73,25 +67,8 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
     }
   };
 
-  const handleValidationComplete = (success: boolean) => {
-    if (success) {
-      toast({
-        title: "Validação concluída",
-        description: "Sua identidade foi confirmada. A contestação pode prosseguir.",
-      });
-      const botResponse: Message = {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: "Sua identidade foi validada com sucesso! Agora podemos prosseguir com a análise da sua contestação. Um analista entrará em contato em até 48 horas úteis.",
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    } else {
-      toast({
-        title: "Validação falhou",
-        description: "Não foi possível confirmar sua identidade. Tente novamente.",
-        variant: "destructive",
-      });
-    }
+  const handleFacialValidation = () => {
+    navigate("/facial-validation");
   };
 
   if (!isOpen) return null;
@@ -138,7 +115,7 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
         <div className="p-4 border-t border-border space-y-3">
           {facialValidationRequested && (
             <Button
-              onClick={() => setShowFacialValidation(true)}
+              onClick={handleFacialValidation}
               variant="outline"
               className="w-full border-primary text-primary hover:bg-primary/10"
             >
@@ -164,12 +141,6 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
           </div>
         </div>
       </div>
-
-      <FacialValidationModal
-        isOpen={showFacialValidation}
-        onClose={() => setShowFacialValidation(false)}
-        onValidationComplete={handleValidationComplete}
-      />
     </>
   );
 }
