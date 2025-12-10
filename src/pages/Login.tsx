@@ -11,10 +11,48 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/v1/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+
+      if (!response.ok) {
+        setErrorMsg("Usuário ou senha inválidos.");
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      // --- SALVAR TOKEN E DADOS DO USUÁRIO ---
+      localStorage.setItem("token", data.token.access_token);
+      localStorage.setItem("user.username", data.user.username);
+      localStorage.setItem("user.name", data.user.name);
+
+      // --- REDIRECIONAR ---
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
+      setErrorMsg("Erro ao conectar ao servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,22 +63,22 @@ const Login = () => {
           <p className="text-muted-foreground text-sm">Acesse sua conta</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+          
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-foreground">Usuário</Label>
+            <Label htmlFor="username">Usuário</Label>
             <Input
               id="username"
               type="text"
               placeholder="Digite seu usuário"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="bg-card border-border focus:border-primary"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-foreground">Senha</Label>
+            <Label htmlFor="password">Senha</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -48,42 +86,31 @@ const Login = () => {
                 placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-card border-border focus:border-primary pr-10"
                 required
+                className="pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
 
+          {errorMsg && (
+            <p className="text-red-500 text-sm text-center">{errorMsg}</p>
+          )}
+
           <Button 
-            type="submit" 
-            className="w-full bg-gradient-primary hover:opacity-90 transition-opacity text-primary-foreground font-semibold h-12"
+            type="submit"
+            className="w-full h-12"
+            disabled={loading}
           >
-            Entrar
+            {loading ? "Entrando..." : "Entrar"}
           </Button>
-
-          <button
-            type="button"
-            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Esqueci minha senha
-          </button>
         </form>
-
-        <div className="text-center animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          <p className="text-muted-foreground text-sm">
-            Ainda não tem conta?{" "}
-            <button className="text-gradient font-semibold hover:opacity-80 transition-opacity">
-              Abra a sua
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );
