@@ -8,12 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface HeaderProps {
-  userName: string;
-}
-
-export function Header({ userName }: HeaderProps) {
+export function Header() {
   const navigate = useNavigate();
+
+  const userName = localStorage.getItem("user.name") || "Usuário";
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -22,9 +20,12 @@ export function Header({ userName }: HeaderProps) {
     return "Boa noite";
   };
 
-  const handleLogout = () => {
-    navigate("/");
-  };
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user.username");
+  localStorage.removeItem("user.name");
+  navigate("/");
+};
 
   return (
     <header className="flex items-center justify-between py-6 animate-fade-in">
