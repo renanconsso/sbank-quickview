@@ -20,6 +20,7 @@ interface ChatDrawerProps {
 export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDrawerProps) {
   const navigate = useNavigate();
   const [facialValidationRequested, setFacialValidationRequested] = useState(false);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -27,9 +28,13 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
       content: `Olá! Estou aqui para ajudar com a contestação da transação "${transactionDescription}". Como posso ajudar?`,
     },
   ]);
+
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
+  // ----------------------------------------------------
+  // Enviar mensagem do usuário + consumir backend real
+  // ----------------------------------------------------
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -39,25 +44,57 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
     };
 
     setMessages((prev) => [...prev, userMessage]);
+
+    const userInput = input;
     setInput("");
 
-    // Simulated backend response
-    setTimeout(() => {
-      // Backend returns message requiring photo validation
-      const responseContent = "Para prosseguir com a contestação deste valor, é necessário validação por foto. Por favor, clique no botão abaixo para realizar a validação facial.";
-      
-      const botResponse: Message = {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch("http://127.0.0.1:8000/api/v1/chatbot/message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message: userInput }),
+      });
+
+      const data = await response.json();
+
+      // LIMPAR TAG INTERNA ANTES DE EXIBIR AO USUÁRIO
+      const cleanText = data.response
+        ?.replace("[AÇÃO: SOLICITAR_FACE_ID]", "")
+        .trim();
+
+      const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: responseContent,
+        content: cleanText,
       };
-      setMessages((prev) => [...prev, botResponse]);
 
-      // Check if message contains the trigger phrase
-      if (responseContent.toLowerCase().includes("necessário validação por foto")) {
+      setMessages((prev) => [...prev, botMessage]);
+
+      // Detectar a tag interna mesmo após remover visualmente
+      if (
+        data.response?.includes("[AÇÃO: SOLICITAR_FACE_ID]") ||
+        data.response?.toLowerCase().includes("validação por foto") ||
+        data.trigger_facial === true
+      ) {
         setFacialValidationRequested(true);
       }
-    }, 1000);
+
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
+
+      const botError: Message = {
+        id: (Date.now() + 2).toString(),
+        role: "assistant",
+        content: "Erro ao conectar com o servidor. Tente novamente.",
+      };
+
+      setMessages((prev) => [...prev, botError]);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -67,20 +104,21 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
     }
   };
 
-  const handleFacialValidation = () => {
-    navigate("/facial-validation");
-  };
+  const handleFacialValidation = () => navigate("/facial-validation");
 
   if (!isOpen) return null;
 
   return (
     <>
       <div className="fixed inset-y-0 right-0 w-full sm:w-96 bg-card border-l border-border shadow-2xl z-50 flex flex-col animate-slide-in-right">
+        
+        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-primary">
           <div>
             <h3 className="font-semibold text-foreground">Contestar Pagamento</h3>
             <p className="text-xs text-muted-foreground">Assistente virtual</p>
           </div>
+
           <Button
             variant="ghost"
             size="icon"
@@ -91,6 +129,7 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
           </Button>
         </div>
 
+        {/* Área de mensagens */}
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages.map((message) => (
@@ -105,14 +144,16 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
                       : "bg-muted text-foreground"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-line">{message.content}</p>
                 </div>
               </div>
             ))}
           </div>
         </ScrollArea>
 
+        {/* Rodapé */}
         <div className="p-4 border-t border-border space-y-3">
+          
           {facialValidationRequested && (
             <Button
               onClick={handleFacialValidation}
@@ -123,6 +164,7 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
               Validação Facial
             </Button>
           )}
+
           <div className="flex gap-2">
             <Input
               value={input}
@@ -131,6 +173,7 @@ export function ChatDrawer({ isOpen, onClose, transactionDescription }: ChatDraw
               placeholder="Digite sua mensagem..."
               className="bg-muted border-border"
             />
+
             <Button
               onClick={handleSend}
               size="icon"

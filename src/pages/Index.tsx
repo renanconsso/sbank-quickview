@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Header } from "@/components/Header";
 import { BalanceCard } from "@/components/BalanceCard";
 import { TransactionList } from "@/components/TransactionList";
@@ -44,10 +46,25 @@ const mockTransactions: Transaction[] = [
 ];
 
 const Index = () => {
-  const userName = "Carlos Eduardo";
-  const balance = 8750.42;
+  const navigate = useNavigate();
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  // -----------------------------------------------------
+  // PEGAR O NOME DO USUÁRIO DO LOCALSTORAGE (padrão Login)
+  // -----------------------------------------------------
+  const [userName, setUserName] = useState("Usuário");
+
+  useEffect(() => {
+    const storedName =
+      localStorage.getItem("user_name") ||
+      localStorage.getItem("user.name") ||
+      "Usuário";
+
+    setUserName(storedName);
+  }, []);
+
+  const balance = 8750.42;
 
   const handleContestTransaction = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -59,11 +76,20 @@ const Index = () => {
     setSelectedTransaction(null);
   };
 
+  // ------------------------------------
+  // SE NÃO TIVER TOKEN → REDIRECIONAR
+  // ------------------------------------
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) navigate("/");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-lg mx-auto px-4 pb-8">
-        <Header userName={userName} />
         
+        <Header userName={userName} />
+
         <main className="space-y-6">
           <BalanceCard balance={balance} />
           <TransactionList 
@@ -71,6 +97,7 @@ const Index = () => {
             onContestTransaction={handleContestTransaction}
           />
         </main>
+
       </div>
 
       <ChatDrawer

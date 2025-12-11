@@ -14,46 +14,50 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg("");
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setErrorMsg("");
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
-      });
+  if (!username || !password) {
+    setErrorMsg("Preencha usuário e senha.");
+    setLoading(false);
+    return;
+  }
 
-      if (!response.ok) {
-        setErrorMsg("Usuário ou senha inválidos.");
-        setLoading(false);
-        return;
-      }
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/v1/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "accept": "application/json"
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      }),
+    });
 
-      const data = await response.json();
-
-      // --- SALVAR TOKEN E DADOS DO USUÁRIO ---
-      localStorage.setItem("token", data.token.access_token);
-      localStorage.setItem("user.username", data.user.username);
-      localStorage.setItem("user.name", data.user.name);
-
-      // --- REDIRECIONAR ---
-      navigate("/dashboard");
-
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      setErrorMsg("Erro ao conectar ao servidor.");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error("Usuário ou senha incorretos");
     }
-  };
+
+    const data = await response.json();
+
+    // Armazenar token e nome no localStorage
+    localStorage.setItem("access_token", data.token.access_token);
+    localStorage.setItem("user_name", data.user.name);
+
+    // Redireciona para dashboard
+    navigate("/dashboard");
+
+  } catch (err: any) {
+    setErrorMsg(err.message || "Erro ao fazer login");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
